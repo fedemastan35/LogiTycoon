@@ -1,0 +1,154 @@
+import { useState } from 'react';
+import { GameProvider, useGame } from './context/GameContext';
+import { MapView } from './features/map/MapView';
+import { FleetList } from './features/fleet/FleetList';
+import { ContractBoard } from './features/contracts/ContractBoard';
+import { BankPanel } from './features/bank/BankPanel';
+import { Truck, Package, LayoutDashboard, Pause, Play, Landmark } from 'lucide-react';
+import './styles/global.css';
+
+// Components
+const SidebarItem = ({ icon: Icon, label, active, onClick }: any) => (
+  <div
+    onClick={onClick}
+    className={`p-3 rounded-xl cursor-pointer transition-all flex flex-col items-center gap-1
+        ${active ? 'bg-blue-600 shadow-lg shadow-blue-500/30 text-white' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}
+    `}
+  >
+    <Icon size={24} />
+    <span className="text-[10px] md:text-xs font-medium">{label}</span>
+  </div>
+);
+
+const GameControls = () => {
+  const { state, dispatch } = useGame();
+  const { game } = state;
+
+  // Format Game Time
+  const date = new Date(game.time);
+  const timeString = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const dayString = date.toLocaleDateString([], { weekday: 'short', day: 'numeric' });
+
+  return (
+    <div className="glass-panel p-2 flex items-center gap-2 md:gap-4 px-3 md:px-4 scale-90 origin-right md:scale-100">
+      <div className="flex flex-col">
+        <span className="text-sm font-bold text-white">{timeString}</span>
+        <span className="text-xs text-slate-400">{dayString}</span>
+      </div>
+
+      <div className="h-8 w-[1px] bg-slate-700 mx-1 md:mx-2"></div>
+
+      <button className="text-slate-200 hover:text-white" onClick={() => dispatch({ type: 'TOGGLE_PAUSE' })}>
+        {game.paused ? <Play size={20} fill="currentColor" /> : <Pause size={20} fill="currentColor" />}
+      </button>
+
+      <div className="flex bg-slate-800 rounded p-1 gap-1 hidden sm:flex">
+        {[1, 10, 50, 500].map(speed => (
+          <button
+            key={speed}
+            onClick={() => dispatch({ type: 'SET_SPEED', payload: speed })}
+            className={`text-xs px-2 py-1 rounded ${game.gameSpeed === speed ? 'bg-blue-600 text-white' : 'text-slate-400 hover:bg-slate-700'}`}
+          >
+            {speed}x
+          </button>
+        ))}
+      </div>
+
+      <div className="h-8 w-[1px] bg-slate-700 mx-1 md:mx-2 hidden sm:block"></div>
+
+      <div className="flex flex-col text-right">
+        <span className="text-xs text-slate-400 hidden sm:inline">Balance</span>
+        <span className="text-sm font-bold text-green-400">€ {state.game.money.toLocaleString()}</span>
+      </div>
+    </div>
+  );
+};
+
+const UIOverlay = () => {
+  const [view, setView] = useState<'DASHBOARD' | 'FLEET' | 'CONTRACTS' | 'BANK'>('DASHBOARD');
+  const { state: { trucks } } = useGame();
+
+  const navItems = [
+    { id: 'DASHBOARD', icon: LayoutDashboard, label: 'Home' },
+    { id: 'FLEET', icon: Truck, label: 'Fleet' },
+    { id: 'CONTRACTS', icon: Package, label: 'Jobs' },
+    { id: 'BANK', icon: Landmark, label: 'Bank' },
+  ];
+
+  const commonPanelClass = "glass-panel w-full md:w-96 h-[60vh] md:h-full p-4 pointer-events-auto animate-slide-in flex flex-col absolute bottom-20 md:static";
+
+  return (
+    <div className="absolute inset-0 pointer-events-none flex flex-col">
+      {/* Top Bar */}
+      <div className="w-full p-2 md:p-4 flex justify-between items-start pointer-events-auto z-20">
+        <div className="glass-panel px-3 py-2 md:px-4">
+          <h1 className="text-lg font-bold bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent">
+            LOGI<span className="text-white">TYCOON</span>
+          </h1>
+        </div>
+        <GameControls />
+      </div>
+
+      {/* Main Content Area */}
+      <div className="flex-1 flex overflow-hidden relative z-10">
+
+        {/* Desktop Sidebar */}
+        <div className="hidden md:flex w-20 m-4 mt-0 glass-panel flex-col items-center py-4 gap-4 pointer-events-auto h-fit">
+          {navItems.map(item => (
+            <SidebarItem
+              key={item.id}
+              icon={item.icon}
+              label={item.label}
+              active={view === item.id}
+              onClick={() => setView(item.id as any)}
+            />
+          ))}
+        </div>
+
+        {/* Content Container */}
+        <div className="flex-1 p-2 md:p-4 mt-0 h-full relative pointer-events-none flex flex-col-reverse md:block">
+          {view === 'FLEET' && <FleetList className={commonPanelClass} />}
+          {view === 'CONTRACTS' && <ContractBoard className={commonPanelClass} />}
+          {view === 'BANK' && <BankPanel className={commonPanelClass} />}
+          {view === 'DASHBOARD' && (
+            <div className={commonPanelClass}>
+              <h2 className="text-2xl font-bold mb-2">Welcome Manager</h2>
+              <p className="text-slate-400 mb-4">You have {trucks.length} truck{trucks.length !== 1 ? 's' : ''}.</p>
+
+              <div className="grid grid-cols-2 gap-4">
+                <button onClick={() => setView('CONTRACTS')} className="btn btn-primary justify-center text-sm">Find Jobs</button>
+                <button onClick={() => setView('FLEET')} className="btn justify-center text-sm">Manage</button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Mobile Bottom Navigation */}
+      <div className="md:hidden fixed bottom-0 left-0 w-full glass-panel rounded-none border-x-0 border-b-0 flex justify-around p-2 pointer-events-auto z-30 bg-slate-900/90 backdrop-blur-md">
+        {navItems.map(item => (
+          <SidebarItem
+            key={item.id}
+            icon={item.icon}
+            label={item.label}
+            active={view === item.id}
+            onClick={() => setView(item.id as any)}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <GameProvider>
+      <div className="relative w-full h-full bg-slate-900 overflow-hidden text-slate-100">
+        <MapView />
+        <UIOverlay />
+      </div>
+    </GameProvider>
+  )
+}
+
+export default App

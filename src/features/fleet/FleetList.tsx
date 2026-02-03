@@ -11,6 +11,10 @@ export const FleetList: React.FC<{ className?: string }> = ({ className }) => {
 
     const buyTruck = () => {
         if (game.money >= 50000) {
+            // Find HQ coordinates, default to London if not found (though HQ is mandatory now)
+            const hqCity = CITIES.find(c => game.hqLocation.startsWith(c.name));
+            const spawnLocation = hqCity ? hqCity.coordinates : { lat: 51.5074, lng: -0.1278 };
+
             dispatch({
                 type: 'BUY_TRUCK',
                 payload: {
@@ -18,7 +22,7 @@ export const FleetList: React.FC<{ className?: string }> = ({ className }) => {
                     name: `MAN TGX #${trucks.length + 1}`,
                     speed: 80,
                     status: 'IDLE',
-                    location: { lat: 51.5074, lng: -0.1278 }, // London default
+                    location: spawnLocation,
                     condition: 100,
                 }
             });

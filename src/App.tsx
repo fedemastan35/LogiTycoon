@@ -90,8 +90,8 @@ const UIOverlay = () => {
   // Wide class for dashboard, normal for side panels
   const isDashboard = view === 'DASHBOARD';
   const commonPanelClass = isDashboard
-    ? "w-full max-w-6xl mx-auto h-[65vh] lg:h-[80vh] p-4 pb-24 lg:pb-4 pointer-events-auto flex flex-col absolute bottom-0 lg:relative lg:bottom-auto z-20"
-    : "glass-panel w-full lg:w-96 h-[50vh] lg:h-full p-4 pb-24 lg:pb-4 pointer-events-auto animate-slide-in flex flex-col absolute bottom-0 lg:static z-20";
+    ? "w-full max-w-6xl mx-auto h-[75vh] lg:h-[80vh] p-4 pb-24 lg:pb-4 pointer-events-auto flex flex-col absolute bottom-0 lg:relative lg:bottom-auto z-20"
+    : "glass-panel w-full lg:w-96 h-[75vh] lg:h-full p-4 pb-24 lg:pb-4 pointer-events-auto animate-slide-in flex flex-col absolute bottom-0 lg:static z-20";
 
   return (
     <div className="absolute inset-0 pointer-events-none flex flex-col">
@@ -110,8 +110,8 @@ const UIOverlay = () => {
       {/* Main Content Area */}
       <div className={`flex-1 flex overflow-hidden relative z-10 transition-opacity duration-300 ${showUI ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
 
-        {/* Desktop Sidebar (Only visible on XL screens to prevent overlap on tablets) */}
-        <div className="hidden xl:flex w-20 m-4 mt-0 glass-panel flex-col items-center py-4 gap-4 pointer-events-auto h-fit">
+        {/* Desktop Sidebar (Only visible on LG screens and up) */}
+        <div className="hidden lg:flex w-20 m-4 mt-0 glass-panel flex-col items-center py-4 gap-4 pointer-events-auto h-fit">
           {navItems.map(item => (
             <SidebarItem
               key={item.id}
@@ -124,7 +124,7 @@ const UIOverlay = () => {
         </div>
 
         {/* Content Container */}
-        <div className={`flex-1 p-2 lg:p-4 mt-0 h-full relative pointer-events-none flex flex-col-reverse lg:block ${isDashboard ? 'flex items-center justify-center' : ''}`}>
+        <div className={`flex-1 p-2 lg:p-4 mt-0 h-full relative pointer-events-none flex flex-col-reverse lg:block`}>
           {view === 'FLEET' && <FleetList className={commonPanelClass} />}
           {view === 'CONTRACTS' && <ContractBoard className={commonPanelClass} />}
           {view === 'BANK' && <BankPanel className={commonPanelClass} />}

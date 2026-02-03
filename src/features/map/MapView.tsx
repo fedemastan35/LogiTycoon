@@ -116,7 +116,7 @@ export const MapView: React.FC = () => {
     return (
         <div className="absolute inset-0 w-full h-full z-0" style={{ backgroundColor: '#0f172a' }}>
             <MapContainer
-                center={[50.0, 10.0]}
+                center={[50.0, 5.0]} // Shifted West to prevent sidebar overlap
                 zoom={4}
                 style={{ height: '100%', width: '100%', background: '#0f172a' }}
                 attributionControl={false}

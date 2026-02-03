@@ -90,14 +90,14 @@ const UIOverlay = () => {
   // Wide class for dashboard, normal for side panels
   const isDashboard = view === 'DASHBOARD';
   const commonPanelClass = isDashboard
-    ? "w-full max-w-6xl mx-auto h-[70vh] lg:h-[80vh] p-4 pointer-events-auto flex flex-col absolute bottom-0 lg:relative lg:bottom-auto z-20"
-    : "glass-panel w-full lg:w-96 h-[50vh] lg:h-full p-4 pointer-events-auto animate-slide-in flex flex-col absolute bottom-0 lg:static z-20";
+    ? "w-full max-w-6xl mx-auto h-[65vh] lg:h-[80vh] p-4 pb-24 lg:pb-4 pointer-events-auto flex flex-col absolute bottom-0 lg:relative lg:bottom-auto z-20"
+    : "glass-panel w-full lg:w-96 h-[50vh] lg:h-full p-4 pb-24 lg:pb-4 pointer-events-auto animate-slide-in flex flex-col absolute bottom-0 lg:static z-20";
 
   return (
     <div className="absolute inset-0 pointer-events-none flex flex-col">
       {/* Top Bar - Always Visible (contains toggle) */}
       <div className="w-full p-2 lg:p-4 flex justify-between items-start pointer-events-auto z-30 relative">
-        <div className={`glass-panel px-3 py-2 lg:px-4 transition-opacity duration-300 absolute left-1/2 -translate-x-1/2 ${showUI ? 'opacity-100' : 'opacity-0'}`}>
+        <div className={`glass-panel px-3 py-2 lg:px-4 transition-opacity duration-300 absolute left-1/2 -translate-x-1/2 hidden lg:block ${showUI ? 'opacity-100' : 'opacity-0'}`}>
           <h1 className="text-lg font-bold bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent">
             LOGI<span className="text-white">TYCOON</span>
           </h1>
@@ -110,8 +110,8 @@ const UIOverlay = () => {
       {/* Main Content Area */}
       <div className={`flex-1 flex overflow-hidden relative z-10 transition-opacity duration-300 ${showUI ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
 
-        {/* Desktop Sidebar (Changed from md to lg for better tablet separation) */}
-        <div className="hidden lg:flex w-20 m-4 mt-0 glass-panel flex-col items-center py-4 gap-4 pointer-events-auto h-fit">
+        {/* Desktop Sidebar (Only visible on XL screens to prevent overlap on tablets) */}
+        <div className="hidden xl:flex w-20 m-4 mt-0 glass-panel flex-col items-center py-4 gap-4 pointer-events-auto h-fit">
           {navItems.map(item => (
             <SidebarItem
               key={item.id}

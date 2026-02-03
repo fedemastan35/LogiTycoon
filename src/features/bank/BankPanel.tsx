@@ -24,7 +24,7 @@ export const BankPanel: React.FC<{ className?: string }> = ({ className }) => {
                 </h2>
                 <div className="text-right">
                     <div className="text-xs text-slate-400">Current Balance</div>
-                    <div className="text-xl font-bold text-green-400">€ {game.money.toLocaleString()}</div>
+                    <div className="text-xl font-bold text-green-400">€ {game.money.toLocaleString(undefined, { maximumFractionDigits: 0 })}</div>
                 </div>
             </div>
 
@@ -32,11 +32,11 @@ export const BankPanel: React.FC<{ className?: string }> = ({ className }) => {
                 <div className="text-xs text-slate-400 mb-2 uppercase tracking-wide font-bold">Financial Status</div>
                 <div className="flex justify-between items-center mb-2">
                     <span className="text-sm text-slate-300">Total Loans</span>
-                    <span className="text-sm font-bold text-white">€ {game.loans.reduce((acc, l) => acc + l.amount, 0).toLocaleString()}</span>
+                    <span className="text-sm font-bold text-white">€ {game.loans.reduce((acc, l) => acc + l.amount, 0).toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
                 </div>
                 <div className="flex justify-between items-center">
                     <span className="text-sm text-slate-300">Daily Interest (1%)</span>
-                    <span className="text-sm font-bold text-red-400">- € {totalDailyPayment.toLocaleString()}</span>
+                    <span className="text-sm font-bold text-red-400">- € {totalDailyPayment.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
                 </div>
             </div>
 

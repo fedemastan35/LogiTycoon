@@ -20,7 +20,7 @@ export const Dashboard: React.FC<{ className?: string }> = ({ className }) => {
                 <div>
                     <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{label}</span>
                     <div className="text-2xl font-bold mt-1 text-white">
-                        {label === 'Total Cash' ? `€ ${value.toLocaleString()}` : value}
+                        {label === 'Total Cash' ? `€ ${value.toLocaleString(undefined, { maximumFractionDigits: 0 })}` : value}
                     </div>
                 </div>
                 <div className="p-2 bg-slate-800/50 rounded-lg text-blue-400 group-hover:scale-110 transition-transform">

@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useGame } from '../../context/GameContext';
 import { Truck as TruckIcon, MapPin, Gauge, ShieldCheck } from 'lucide-react';
+import { CITIES } from '../../data/cities';
+import { getClosestCity } from '../../utils/geoUtils';
 
 export const FleetList: React.FC<{ className?: string }> = ({ className }) => {
     const { state, dispatch } = useGame();
@@ -96,18 +98,30 @@ export const FleetList: React.FC<{ className?: string }> = ({ className }) => {
 
                                         <div className="space-y-4">
                                             {/* Condition Bar */}
-                                            <div className="space-y-1">
+                                            <div className="space-y-2">
                                                 <div className="flex justify-between items-center text-[10px] font-bold uppercase">
                                                     <span className="text-slate-500 flex items-center gap-1">
                                                         <Gauge size={10} /> Condition
                                                     </span>
-                                                    <span className="text-white">{truck.condition}%</span>
+                                                    <span className={`${truck.condition < 30 ? 'text-red-400' : 'text-white'}`}>{Math.round(truck.condition)}%</span>
                                                 </div>
-                                                <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
-                                                    <div
-                                                        className="h-full bg-amber-500 transition-all duration-500 ease-out"
-                                                        style={{ width: `${truck.condition}%` }}
-                                                    />
+                                                <div className="flex items-center gap-4">
+                                                    <div className="h-1.5 flex-1 bg-slate-800 rounded-full overflow-hidden">
+                                                        <div
+                                                            className={`h-full transition-all duration-500 ease-out ${truck.condition < 30 ? 'bg-red-500' : 'bg-amber-500'
+                                                                }`}
+                                                            style={{ width: `${truck.condition}%` }}
+                                                        />
+                                                    </div>
+                                                    {truck.condition < 100 && (
+                                                        <button
+                                                            onClick={() => dispatch({ type: 'REPAIR_TRUCK', payload: truck.id })}
+                                                            disabled={game.money < (100 - truck.condition) * 50 || truck.status !== 'IDLE'}
+                                                            className="px-3 py-1 bg-slate-800 hover:bg-slate-700 disabled:opacity-30 border border-slate-700 rounded-lg text-[10px] font-black text-blue-400 uppercase transition-all"
+                                                        >
+                                                            Repair (€{Math.round((100 - truck.condition) * 50).toLocaleString()})
+                                                        </button>
+                                                    )}
                                                 </div>
                                             </div>
 
@@ -117,7 +131,7 @@ export const FleetList: React.FC<{ className?: string }> = ({ className }) => {
                                                     <MapPin size={10} /> Location
                                                 </span>
                                                 <span className="text-xs font-bold text-slate-300">
-                                                    {Math.abs(truck.location.lat).toFixed(1)}°{truck.location.lat > 0 ? 'N' : 'S'}, {Math.abs(truck.location.lng).toFixed(1)}°{truck.location.lng > 0 ? 'E' : 'W'}
+                                                    {getClosestCity(truck.location, CITIES)}
                                                 </span>
                                             </div>
                                         </div>

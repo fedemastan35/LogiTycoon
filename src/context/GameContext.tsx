@@ -25,7 +25,8 @@ type Action =
     | { type: 'HIRE_DRIVER'; payload: string }
     | { type: 'ASSIGN_DRIVER'; payload: { driverId: string; truckId: string } }
     | { type: 'SET_HQ'; payload: string }
-    | { type: 'COMPLETE_CONTRACT'; payload: string };
+    | { type: 'COMPLETE_CONTRACT'; payload: string }
+    | { type: 'REPAIR_TRUCK'; payload: string };
 
 const initialState: State = {
     game: INITIAL_GAME_STATE,
@@ -137,6 +138,11 @@ function gameReducer(state: State, action: Action): State {
 
                 nextTruck.location = currentPos;
                 nextTruck.routeIndex = currentIndex;
+
+                // Wear and Tear: Reduce condition based on distance moved
+                // e.g. 0.01% per km
+                const actualDistMoved = getDistance(truck.location, currentPos);
+                nextTruck.condition = Math.max(0, truck.condition - (actualDistMoved * 0.01));
 
                 // Check if arrived at end of path
                 if (currentIndex >= truck.routePath.length) {
@@ -382,6 +388,26 @@ function gameReducer(state: State, action: Action): State {
                     hqLocation,
                     money: state.game.money - cost
                 }
+            };
+        }
+
+        case 'REPAIR_TRUCK': {
+            const truckId = action.payload;
+            const truck = state.trucks.find(t => t.id === truckId);
+            if (!truck) return state;
+
+            const repairCost = (100 - truck.condition) * 50; // €50 per 1% damage
+            if (state.game.money < repairCost) return state;
+
+            return {
+                ...state,
+                game: {
+                    ...state.game,
+                    money: state.game.money - repairCost
+                },
+                trucks: state.trucks.map(t =>
+                    t.id === truckId ? { ...t, condition: 100 } : t
+                )
             };
         }
 

@@ -38,7 +38,7 @@ export const Dashboard: React.FC<{ className?: string }> = ({ className }) => {
     );
 
     return (
-        <div className={className || "w-full h-full flex flex-col gap-6 animate-slide-in pointer-events-auto overflow-y-auto custom-scrollbar pr-2"}>
+        <div className={className || "w-full h-full flex flex-col gap-6 animate-slide-in pointer-events-auto"}>
             {/* Header */}
             <div>
                 <h2 className="text-3xl font-black bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent uppercase tracking-tighter">

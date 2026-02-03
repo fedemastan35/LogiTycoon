@@ -90,14 +90,14 @@ const UIOverlay = () => {
   // Wide class for dashboard, normal for side panels
   const isDashboard = view === 'DASHBOARD';
   const commonPanelClass = isDashboard
-    ? "w-full max-w-6xl mx-auto h-[92vh] xl:h-[80vh] p-4 pb-24 xl:pb-4 pointer-events-auto flex flex-col absolute top-14 xl:relative xl:top-auto z-20 overflow-y-auto"
-    : "glass-panel w-full xl:w-96 h-[92vh] xl:h-full p-4 pb-24 xl:pb-4 pointer-events-auto animate-slide-in flex flex-col absolute top-14 xl:static z-20 overflow-y-auto";
+    ? "w-full max-w-6xl mx-auto h-[calc(100vh-80px)] lg:h-[80vh] p-4 pb-32 lg:pb-4 pointer-events-auto flex flex-col fixed top-14 lg:relative lg:top-auto z-20 overflow-y-auto overflow-x-hidden"
+    : "glass-panel w-full lg:w-96 h-[calc(100vh-80px)] lg:h-full p-4 pb-32 lg:pb-4 pointer-events-auto animate-slide-in flex flex-col fixed top-14 lg:static z-20 overflow-y-auto overflow-x-hidden";
 
   return (
     <div className="absolute inset-0 pointer-events-none flex flex-col">
       {/* Top Bar - Always Visible (contains toggle) */}
       <div className="w-full p-2 lg:p-4 flex justify-between items-start pointer-events-auto z-30 relative">
-        <div className={`glass-panel px-3 py-2 lg:px-4 transition-opacity duration-300 absolute left-4 xl:left-1/2 xl:-translate-x-1/2 hidden xl:block ${showUI ? 'opacity-100' : 'opacity-0'}`}>
+        <div className={`glass-panel px-3 py-2 lg:px-4 transition-opacity duration-300 absolute left-4 lg:left-1/2 lg:-translate-x-1/2 hidden lg:block ${showUI ? 'opacity-100' : 'opacity-0'}`}>
           <h1 className="text-lg font-bold bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent">
             LOGI<span className="text-white">TYCOON</span>
           </h1>
@@ -110,8 +110,8 @@ const UIOverlay = () => {
       {/* Main Content Area */}
       <div className={`flex-1 flex overflow-hidden relative z-10 transition-opacity duration-300 ${showUI ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
 
-        {/* Desktop Sidebar (Only visible on XL screens and up) */}
-        <div className="hidden xl:flex w-20 m-4 mt-0 glass-panel flex-col items-center py-4 gap-4 pointer-events-auto h-fit">
+        {/* Desktop Sidebar (Only visible on LG screens and up) */}
+        <div className="hidden lg:flex w-20 m-4 mt-0 glass-panel flex-col items-center py-4 gap-4 pointer-events-auto h-fit">
           {navItems.map(item => (
             <SidebarItem
               key={item.id}
@@ -124,7 +124,7 @@ const UIOverlay = () => {
         </div>
 
         {/* Content Container */}
-        <div className={`flex-1 p-2 xl:p-4 mt-0 h-full relative pointer-events-none flex flex-col xl:block`}>
+        <div className={`flex-1 p-2 lg:p-4 mt-0 h-full relative pointer-events-none flex flex-col lg:block`}>
           {view === 'FLEET' && <FleetList className={commonPanelClass} />}
           {view === 'CONTRACTS' && <ContractBoard className={commonPanelClass} />}
           {view === 'BANK' && <BankPanel className={commonPanelClass} />}
@@ -133,8 +133,8 @@ const UIOverlay = () => {
         </div>
       </div>
 
-      {/* Mobile Bottom Navigation (Visible on xl and below) */}
-      <div className={`xl:hidden fixed bottom-0 left-0 w-full glass-panel rounded-none border-x-0 border-b-0 flex justify-around p-2 pointer-events-auto z-30 bg-slate-900/95 backdrop-blur-md transition-transform duration-300 ${showUI ? 'translate-y-0' : 'translate-y-full'}`}>
+      {/* Mobile Bottom Navigation (Visible on lg and below) */}
+      <div className={`lg:hidden fixed bottom-0 left-0 w-full glass-panel rounded-none border-x-0 border-b-0 flex justify-around p-2 pointer-events-auto z-30 bg-slate-900/95 backdrop-blur-md transition-transform duration-300 ${showUI ? 'translate-y-0' : 'translate-y-full'}`}>
         {navItems.map(item => (
           <SidebarItem
             key={item.id}

@@ -54,6 +54,26 @@ const cityIcon = new L.DivIcon({
     iconAnchor: [4, 4]
 });
 
+const hqIcon = new L.DivIcon({
+    className: 'custom-hq-icon',
+    html: `<div style="
+    background-color: #3b82f6; 
+    width: 24px; 
+    height: 24px; 
+    border-radius: 6px; 
+    border: 2px solid white;
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+  ">
+    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+  </div>`,
+    iconSize: [24, 24],
+    iconAnchor: [12, 12]
+});
+
 export const MapView: React.FC = () => {
     const { state } = useGame();
     const { trucks } = state;
@@ -113,6 +133,22 @@ export const MapView: React.FC = () => {
                         )}
                     </React.Fragment>
                 ))}
+
+                {/* HQ Marker */}
+                {(() => {
+                    const hqCity = CITIES.find(c => state.game.hqLocation.startsWith(c.name));
+                    if (!hqCity) return null;
+                    return (
+                        <Marker position={[hqCity.coordinates.lat, hqCity.coordinates.lng]} icon={hqIcon} zIndexOffset={1000}>
+                            <Popup className="glass-popup">
+                                <div className="p-2">
+                                    <h3 className="font-bold text-slate-800">Company HQ</h3>
+                                    <p className="text-xs text-slate-600">{hqCity.name}</p>
+                                </div>
+                            </Popup>
+                        </Marker>
+                    );
+                })()}
 
             </MapContainer>
         </div>

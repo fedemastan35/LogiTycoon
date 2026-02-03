@@ -24,6 +24,16 @@ export interface Truck {
     routePath?: Coordinates[]; // Series of points to follow
     routeIndex?: number; // Current target index in path
     pendingRoutePath?: Coordinates[]; // For the next leg (e.g. Cargo run after deadhead)
+    driverId?: string;
+}
+
+export interface Driver {
+    id: string;
+    name: string;
+    salary: number; // Daily salary
+    skill: number; // 1-5, affects fuel efficiency and speed?
+    status: 'IDLE' | 'ASSIGNED';
+    assignedTruckId?: string;
 }
 
 export interface Contract {

@@ -4,7 +4,8 @@ import { MapView } from './features/map/MapView';
 import { FleetList } from './features/fleet/FleetList';
 import { ContractBoard } from './features/contracts/ContractBoard';
 import { BankPanel } from './features/bank/BankPanel';
-import { Truck, Package, LayoutDashboard, Pause, Play, Landmark } from 'lucide-react';
+import { DriverMarket } from './features/drivers/DriverMarket';
+import { Truck, Package, LayoutDashboard, Pause, Play, Landmark, Eye, EyeOff, Users } from 'lucide-react';
 import './styles/global.css';
 
 // Components
@@ -16,11 +17,11 @@ const SidebarItem = ({ icon: Icon, label, active, onClick }: any) => (
     `}
   >
     <Icon size={24} />
-    <span className="text-[10px] md:text-xs font-medium">{label}</span>
+    <span className="text-[10px] lg:text-xs font-medium">{label}</span>
   </div>
 );
 
-const GameControls = () => {
+const GameControls = ({ showUI, setShowUI }: { showUI: boolean, setShowUI: (v: boolean) => void }) => {
   const { state, dispatch } = useGame();
   const { game } = state;
 
@@ -30,20 +31,21 @@ const GameControls = () => {
   const dayString = date.toLocaleDateString([], { weekday: 'short', day: 'numeric' });
 
   return (
-    <div className="glass-panel p-2 flex items-center gap-2 md:gap-4 px-3 md:px-4 scale-90 origin-right md:scale-100">
+    <div className="glass-panel p-2 flex items-center gap-2 lg:gap-4 px-3 lg:px-4 scale-90 origin-right lg:scale-100 transition-opacity duration-300">
       <div className="flex flex-col">
         <span className="text-sm font-bold text-white">{timeString}</span>
         <span className="text-xs text-slate-400">{dayString}</span>
       </div>
 
-      <div className="h-8 w-[1px] bg-slate-700 mx-1 md:mx-2"></div>
+      <div className="h-8 w-[1px] bg-slate-700 mx-1 lg:mx-2"></div>
 
       <button className="text-slate-200 hover:text-white" onClick={() => dispatch({ type: 'TOGGLE_PAUSE' })}>
         {game.paused ? <Play size={20} fill="currentColor" /> : <Pause size={20} fill="currentColor" />}
       </button>
 
+      {/* Speed Controls: Only 1x and 3x */}
       <div className="flex bg-slate-800 rounded p-1 gap-1 hidden sm:flex">
-        {[1, 10, 50, 500].map(speed => (
+        {[1, 3].map(speed => (
           <button
             key={speed}
             onClick={() => dispatch({ type: 'SET_SPEED', payload: speed })}
@@ -54,46 +56,56 @@ const GameControls = () => {
         ))}
       </div>
 
-      <div className="h-8 w-[1px] bg-slate-700 mx-1 md:mx-2 hidden sm:block"></div>
+      <div className="h-8 w-[1px] bg-slate-700 mx-1 lg:mx-2 hidden sm:block"></div>
 
-      <div className="flex flex-col text-right">
+      <div className="flex flex-col text-right mr-2">
         <span className="text-xs text-slate-400 hidden sm:inline">Balance</span>
         <span className="text-sm font-bold text-green-400">€ {state.game.money.toLocaleString()}</span>
       </div>
+
+      <button
+        onClick={() => setShowUI(!showUI)}
+        className={`p-2 rounded-full transition-colors ${!showUI ? 'bg-slate-700 text-slate-300' : 'text-slate-500 hover:text-white'}`}
+        title="Toggle UI"
+      >
+        {showUI ? <Eye size={18} /> : <EyeOff size={18} />}
+      </button>
     </div>
   );
 };
 
 const UIOverlay = () => {
-  const [view, setView] = useState<'DASHBOARD' | 'FLEET' | 'CONTRACTS' | 'BANK'>('DASHBOARD');
+  const [view, setView] = useState<'DASHBOARD' | 'FLEET' | 'CONTRACTS' | 'BANK' | 'DRIVERS'>('DASHBOARD');
+  const [showUI, setShowUI] = useState(true);
   const { state: { trucks } } = useGame();
 
   const navItems = [
     { id: 'DASHBOARD', icon: LayoutDashboard, label: 'Home' },
     { id: 'FLEET', icon: Truck, label: 'Fleet' },
+    { id: 'DRIVERS', icon: Users, label: 'Staff' },
     { id: 'CONTRACTS', icon: Package, label: 'Jobs' },
     { id: 'BANK', icon: Landmark, label: 'Bank' },
   ];
 
-  const commonPanelClass = "glass-panel w-full md:w-96 h-[60vh] md:h-full p-4 pointer-events-auto animate-slide-in flex flex-col absolute bottom-20 md:static";
+  const commonPanelClass = "glass-panel w-full lg:w-96 h-[50vh] lg:h-full p-4 pointer-events-auto animate-slide-in flex flex-col absolute bottom-0 lg:static z-20";
 
   return (
     <div className="absolute inset-0 pointer-events-none flex flex-col">
-      {/* Top Bar */}
-      <div className="w-full p-2 md:p-4 flex justify-between items-start pointer-events-auto z-20">
-        <div className="glass-panel px-3 py-2 md:px-4">
+      {/* Top Bar - Always Visible (contains toggle) */}
+      <div className="w-full p-2 lg:p-4 flex justify-between items-start pointer-events-auto z-30">
+        <div className={`glass-panel px-3 py-2 lg:px-4 transition-opacity duration-300 ${showUI ? 'opacity-100' : 'opacity-0'}`}>
           <h1 className="text-lg font-bold bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent">
             LOGI<span className="text-white">TYCOON</span>
           </h1>
         </div>
-        <GameControls />
+        <GameControls showUI={showUI} setShowUI={setShowUI} />
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex overflow-hidden relative z-10">
+      <div className={`flex-1 flex overflow-hidden relative z-10 transition-opacity duration-300 ${showUI ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
 
-        {/* Desktop Sidebar */}
-        <div className="hidden md:flex w-20 m-4 mt-0 glass-panel flex-col items-center py-4 gap-4 pointer-events-auto h-fit">
+        {/* Desktop Sidebar (Changed from md to lg for better tablet separation) */}
+        <div className="hidden lg:flex w-20 m-4 mt-0 glass-panel flex-col items-center py-4 gap-4 pointer-events-auto h-fit">
           {navItems.map(item => (
             <SidebarItem
               key={item.id}
@@ -106,10 +118,11 @@ const UIOverlay = () => {
         </div>
 
         {/* Content Container */}
-        <div className="flex-1 p-2 md:p-4 mt-0 h-full relative pointer-events-none flex flex-col-reverse md:block">
+        <div className="flex-1 p-2 lg:p-4 mt-0 h-full relative pointer-events-none flex flex-col-reverse lg:block">
           {view === 'FLEET' && <FleetList className={commonPanelClass} />}
           {view === 'CONTRACTS' && <ContractBoard className={commonPanelClass} />}
           {view === 'BANK' && <BankPanel className={commonPanelClass} />}
+          {view === 'DRIVERS' && <DriverMarket className={commonPanelClass} />}
           {view === 'DASHBOARD' && (
             <div className={commonPanelClass}>
               <h2 className="text-2xl font-bold mb-2">Welcome Manager</h2>
@@ -124,8 +137,8 @@ const UIOverlay = () => {
         </div>
       </div>
 
-      {/* Mobile Bottom Navigation */}
-      <div className="md:hidden fixed bottom-0 left-0 w-full glass-panel rounded-none border-x-0 border-b-0 flex justify-around p-2 pointer-events-auto z-30 bg-slate-900/90 backdrop-blur-md">
+      {/* Mobile Bottom Navigation (Visible on lg and below) */}
+      <div className={`lg:hidden fixed bottom-0 left-0 w-full glass-panel rounded-none border-x-0 border-b-0 flex justify-around p-2 pointer-events-auto z-30 bg-slate-900/90 backdrop-blur-md transition-transform duration-300 ${showUI ? 'translate-y-0' : 'translate-y-full'}`}>
         {navItems.map(item => (
           <SidebarItem
             key={item.id}

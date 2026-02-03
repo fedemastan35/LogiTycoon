@@ -8,6 +8,8 @@ interface State {
     trucks: Truck[];
     contracts: Contract[]; // Available
     activeContracts: Contract[]; // Assigned
+    availableDrivers: import('../types').Driver[]; // Market
+    hiredDrivers: import('../types').Driver[]; // Helper
 }
 
 type Action =
@@ -19,13 +21,24 @@ type Action =
     | { type: 'ASSIGN_JOB'; payload: { truckId: string; contract: Contract } }
     | { type: 'ROUTE_PLANNED'; payload: { truckId: string; routePath: import('../types').Coordinates[]; pendingRoutePath?: import('../types').Coordinates[] } }
     | { type: 'TAKE_LOAN'; payload: number }
-    | { type: 'REPAY_LOAN'; payload: string };
+    | { type: 'REPAY_LOAN'; payload: string }
+    | { type: 'HIRE_DRIVER'; payload: string }
+    | { type: 'ASSIGN_DRIVER'; payload: { driverId: string; truckId: string } };
 
 const initialState: State = {
     game: INITIAL_GAME_STATE,
-    trucks: INITIAL_TRUCKS,
+    trucks: INITIAL_TRUCKS.map(t => ({ ...t, driverId: 'd-initial' })), // Assign initial driver
     contracts: [],
     activeContracts: [],
+    availableDrivers: [
+        { id: 'd-1', name: 'John Doe', salary: 100, skill: 2, status: 'IDLE' },
+        { id: 'd-2', name: 'Jane Smith', salary: 150, skill: 3, status: 'IDLE' },
+        { id: 'd-3', name: 'Max Power', salary: 250, skill: 5, status: 'IDLE' },
+        { id: 'd-4', name: 'Sam Slow', salary: 50, skill: 1, status: 'IDLE' },
+    ],
+    hiredDrivers: [
+        { id: 'd-initial', name: 'You (Owner)', salary: 0, skill: 5, status: 'ASSIGNED', assignedTruckId: 't-1' }
+    ]
 };
 
 function getDistance(c1: { lat: number, lng: number }, c2: { lat: number, lng: number }) {
@@ -70,11 +83,11 @@ function gameReducer(state: State, action: Action): State {
                 newLastInfluenceTime = newTime;
                 // Calculate loan interest/payments
                 state.game.loans.forEach(loan => {
-                    const payment = loan.dailyPayment;
-                    moneySpent += payment;
-                    // Check if loan is paid off?
-                    // Ideally we reduce remainingAmount, but for simplicity let's just deduct interest.
-                    // Or let's make it simple: Daily interest only.
+                    moneySpent += loan.dailyPayment;
+                });
+                // Driver Salaries
+                state.hiredDrivers.forEach(driver => {
+                    moneySpent += driver.salary;
                 });
             }
 
@@ -83,6 +96,18 @@ function gameReducer(state: State, action: Action): State {
 
                 const hoursPassed = timeAdvance / 3600000;
                 let distToMove = truck.speed * hoursPassed; // Distance we can travel this tick
+
+                // Fuel Costs
+                // Base cost: 1 EUR per km.
+                // Skill 1: 1.2x, Skill 5: 0.8x
+                const driver = state.hiredDrivers.find(d => d.id === truck.driverId);
+                const skill = driver ? driver.skill : 1;
+                const costMultiplier = 1.3 - (skill * 0.1); // 1->1.2, 5->0.8
+
+                // Calculate roughly how much we moved this tick (optimized: just use distToMove for cost approximation)
+                // Real distance might be less if we arrive, but close enough.
+                const fuelCost = distToMove * 1.5 * costMultiplier;
+                moneySpent += fuelCost;
 
                 let nextTruck = { ...truck };
                 let currentIndex = truck.routeIndex || 0;
@@ -265,9 +290,50 @@ function gameReducer(state: State, action: Action): State {
                 ...state,
                 game: {
                     ...state.game,
-                    money: state.game.money - loan.amount, // Pay full amount for now
+                    money: state.game.money - loan.amount,
                     loans: state.game.loans.filter(l => l.id !== loanId)
                 }
+            };
+        }
+
+        case 'HIRE_DRIVER': {
+            const driverId = action.payload;
+            const driver = state.availableDrivers.find(d => d.id === driverId);
+            if (!driver || state.game.money < 500) return state;
+
+            return {
+                ...state,
+                availableDrivers: state.availableDrivers.filter(d => d.id !== driverId),
+                hiredDrivers: [...state.hiredDrivers, { ...driver, status: 'IDLE' }],
+                game: {
+                    ...state.game,
+                    money: state.game.money - 500
+                }
+            };
+        }
+
+        case 'ASSIGN_DRIVER': {
+            const { driverId, truckId } = action.payload;
+
+            // Unassign current driver if any
+            const currentDriver = state.hiredDrivers.find(d => d.assignedTruckId === truckId);
+
+            let newHiredDrivers = state.hiredDrivers.map(d => {
+                if (d.id === driverId) return { ...d, status: 'ASSIGNED' as const, assignedTruckId: truckId };
+                if (d.id === currentDriver?.id) return { ...d, status: 'IDLE' as const, assignedTruckId: undefined };
+                return d;
+            });
+
+            const newTrucks = state.trucks.map(t => {
+                if (t.id === truckId) return { ...t, driverId };
+                if (t.driverId === driverId) return { ...t, driverId: undefined };
+                return t;
+            });
+
+            return {
+                ...state,
+                trucks: newTrucks,
+                hiredDrivers: newHiredDrivers
             };
         }
 

@@ -11,4 +11,8 @@ export const CITIES: City[] = [
     { id: 'brussels', name: 'Brussels', coordinates: { lat: 50.8503, lng: 4.3517 } },
     { id: 'vienna', name: 'Vienna', coordinates: { lat: 48.2082, lng: 16.3738 } },
     { id: 'prague', name: 'Prague', coordinates: { lat: 50.0755, lng: 14.4378 } },
+    { id: 'barcelona', name: 'Barcelona', coordinates: { lat: 41.3851, lng: 2.1734 } },
+    { id: 'lyon', name: 'Lyon', coordinates: { lat: 45.7640, lng: 4.8357 } },
+    { id: 'munich', name: 'Munich', coordinates: { lat: 48.1351, lng: 11.5820 } },
+    { id: 'milan', name: 'Milan', coordinates: { lat: 45.4642, lng: 9.1900 } },
 ];

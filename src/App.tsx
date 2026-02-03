@@ -90,19 +90,19 @@ const UIOverlay = () => {
   // Wide class for dashboard, normal for side panels
   const isDashboard = view === 'DASHBOARD';
   const commonPanelClass = isDashboard
-    ? "w-full max-w-6xl mx-auto h-[calc(100vh-80px)] lg:h-[80vh] p-4 pb-32 lg:pb-4 pointer-events-auto flex flex-col fixed top-14 lg:relative lg:top-auto z-20 overflow-y-auto overflow-x-hidden"
-    : "glass-panel w-full lg:w-96 h-[calc(100vh-80px)] lg:h-full p-4 pb-32 lg:pb-4 pointer-events-auto animate-slide-in flex flex-col fixed top-14 lg:static z-20 overflow-y-auto overflow-x-hidden";
+    ? `w-full max-w-6xl mx-auto h-[calc(100vh-80px)] lg:h-[80vh] p-4 pb-32 lg:pb-4 ${showUI ? 'pointer-events-auto' : 'pointer-events-none'} flex flex-col fixed top-14 lg:relative lg:top-auto z-20 overflow-y-auto overflow-x-hidden`
+    : `glass-panel w-full lg:w-96 h-[calc(100vh-80px)] lg:h-full p-4 pb-32 lg:pb-4 ${showUI ? 'pointer-events-auto' : 'pointer-events-none'} animate-slide-in flex flex-col fixed top-14 lg:static z-20 overflow-y-auto overflow-x-hidden`;
 
   return (
     <div className="absolute inset-0 pointer-events-none flex flex-col">
-      {/* Top Bar - Always Visible (contains toggle) */}
-      <div className="w-full p-2 lg:p-4 flex justify-between items-start pointer-events-auto z-30 relative">
-        <div className={`glass-panel px-3 py-2 lg:px-4 transition-opacity duration-300 absolute left-4 lg:left-1/2 lg:-translate-x-1/2 hidden lg:block ${showUI ? 'opacity-100' : 'opacity-0'}`}>
+      {/* Top Bar - Passes through clicks except on buttons */}
+      <div className="w-full p-2 lg:p-4 flex justify-between items-start pointer-events-none z-30 relative">
+        <div className={`glass-panel px-3 py-2 lg:px-4 transition-opacity duration-300 absolute left-4 lg:left-1/2 lg:-translate-x-1/2 pointer-events-auto hidden lg:block ${showUI ? 'opacity-100' : 'opacity-0'}`}>
           <h1 className="text-lg font-bold bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent">
             LOGI<span className="text-white">TYCOON</span>
           </h1>
         </div>
-        <div className="ml-auto">
+        <div className="ml-auto pointer-events-auto">
           <GameControls showUI={showUI} setShowUI={setShowUI} />
         </div>
       </div>
@@ -134,7 +134,7 @@ const UIOverlay = () => {
       </div>
 
       {/* Mobile Bottom Navigation (Visible on lg and below) */}
-      <div className={`lg:hidden fixed bottom-0 left-0 w-full glass-panel rounded-none border-x-0 border-b-0 flex justify-around p-2 pointer-events-auto z-30 bg-slate-900/95 backdrop-blur-md transition-transform duration-300 ${showUI ? 'translate-y-0' : 'translate-y-full'}`}>
+      <div className={`lg:hidden fixed bottom-0 left-0 w-full glass-panel rounded-none border-x-0 border-b-0 flex justify-around p-2 ${showUI ? 'pointer-events-auto' : 'pointer-events-none'} z-30 bg-slate-900/95 backdrop-blur-md transition-transform duration-300 ${showUI ? 'translate-y-0' : 'translate-y-full'}`}>
         {navItems.map(item => (
           <SidebarItem
             key={item.id}

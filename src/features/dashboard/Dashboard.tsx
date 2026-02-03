@@ -4,7 +4,7 @@ import { Wallet, Activity, Truck, TrendingUp, MapPin, Calendar, Star } from 'luc
 import { CITIES } from '../../data/cities';
 
 export const Dashboard: React.FC<{ className?: string }> = ({ className }) => {
-    const { state } = useGame();
+    const { state, dispatch } = useGame();
     const { game, trucks, activeContracts } = state;
 
     // Derived Stats
@@ -139,7 +139,38 @@ export const Dashboard: React.FC<{ className?: string }> = ({ className }) => {
                                 <MapPin size={18} />
                                 <span>HQ Location</span>
                             </div>
-                            <span className="font-bold text-slate-200">{game.hqLocation}</span>
+                            <div className="flex items-center gap-2">
+                                <span className="font-bold text-slate-200">{game.hqLocation}</span>
+                                <button
+                                    onClick={() => dispatch({ type: 'SET_HQ_MODE' as any })} // We'll add this to open a list
+                                    className="p-1 hover:bg-slate-800 rounded text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity"
+                                    title="Relocate HQ (€10,000)"
+                                >
+                                    <TrendingUp size={14} />
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Inline Selector for HQ (Simple version for now) */}
+                        <div className="space-y-2 max-h-40 overflow-y-auto custom-scrollbar p-2 bg-slate-900/50 rounded-lg border border-slate-800">
+                            <div className="text-[10px] font-bold text-slate-500 uppercase flex justify-between">
+                                <span>Relocate HQ</span>
+                                <span>Cost: €10,000</span>
+                            </div>
+                            {CITIES.filter(c => `${c.name}, ${c.id.split('-')[0].toUpperCase()}` !== game.hqLocation).map(city => {
+                                const cityLabel = `${city.name}, ${city.id.split('-')[0].toUpperCase()}`;
+                                return (
+                                    <button
+                                        key={city.id}
+                                        onClick={() => dispatch({ type: 'SET_HQ', payload: cityLabel })}
+                                        disabled={game.money < 10000}
+                                        className="w-full text-left p-2 rounded hover:bg-slate-800 text-xs text-slate-300 flex justify-between items-center transition-colors disabled:opacity-30"
+                                    >
+                                        <span>{city.name}</span>
+                                        <TrendingUp size={12} className="text-blue-500" />
+                                    </button>
+                                );
+                            })}
                         </div>
 
                         <div className="flex justify-between items-center group cursor-default">

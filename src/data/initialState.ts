@@ -9,7 +9,7 @@ export const INITIAL_GAME_STATE: GameState = {
     loans: [],
     // Company Details
     companyName: 'LogiCorp',
-    hqLocation: 'Berlin, DE',
+    hqLocation: 'London, UK',
     foundedDate: '2/2/2026',
     reputation: 'Excellent',
 };

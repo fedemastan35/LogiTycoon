@@ -23,7 +23,8 @@ type Action =
     | { type: 'TAKE_LOAN'; payload: number }
     | { type: 'REPAY_LOAN'; payload: string }
     | { type: 'HIRE_DRIVER'; payload: string }
-    | { type: 'ASSIGN_DRIVER'; payload: { driverId: string; truckId: string } };
+    | { type: 'ASSIGN_DRIVER'; payload: { driverId: string; truckId: string } }
+    | { type: 'SET_HQ'; payload: string };
 
 const initialState: State = {
     game: INITIAL_GAME_STATE,
@@ -334,6 +335,21 @@ function gameReducer(state: State, action: Action): State {
                 ...state,
                 trucks: newTrucks,
                 hiredDrivers: newHiredDrivers
+            };
+        }
+
+        case 'SET_HQ': {
+            const hqLocation = action.payload;
+            const cost = 10000;
+            if (state.game.money < cost) return state;
+
+            return {
+                ...state,
+                game: {
+                    ...state.game,
+                    hqLocation,
+                    money: state.game.money - cost
+                }
             };
         }
 

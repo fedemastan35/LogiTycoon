@@ -68,4 +68,5 @@ export interface GameState {
     foundedDate: string;
     reputation: 'Poor' | 'Small' | 'Good' | 'Excellent' | 'Elite';
     reputationPoints: number;
+    lastJobGenerationTime: number; // Game time of last auto-generation
 }

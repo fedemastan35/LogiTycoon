@@ -13,6 +13,7 @@ export const INITIAL_GAME_STATE: GameState = {
     foundedDate: '2/2/2026',
     reputation: 'Poor',
     reputationPoints: 0,
+    lastJobGenerationTime: 0,
 };
 
 export const INITIAL_TRUCKS: Truck[] = [

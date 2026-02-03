@@ -46,11 +46,11 @@ const GameControls = ({ showUI, setShowUI }: { showUI: boolean, setShowUI: (v: b
 
       {/* Speed Controls: Only 1x and 3x */}
       <div className="flex bg-slate-800 rounded p-1 gap-1 hidden sm:flex">
-        {[1, 3].map(speed => (
+        {[1, 3, 10].map(speed => (
           <button
             key={speed}
             onClick={() => dispatch({ type: 'SET_SPEED', payload: speed })}
-            className={`text-xs px-2 py-1 rounded ${game.gameSpeed === speed ? 'bg-blue-600 text-white' : 'text-slate-400 hover:bg-slate-700'}`}
+            className={`text-xs px-2 py-1 rounded transition-colors ${game.gameSpeed === speed ? 'bg-blue-600 text-white' : 'text-slate-400 hover:bg-slate-700'}`}
           >
             {speed}x
           </button>

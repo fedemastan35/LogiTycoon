@@ -26,7 +26,8 @@ type Action =
     | { type: 'ASSIGN_DRIVER'; payload: { driverId: string; truckId: string } }
     | { type: 'SET_HQ'; payload: string }
     | { type: 'COMPLETE_CONTRACT'; payload: string }
-    | { type: 'REPAIR_TRUCK'; payload: string };
+    | { type: 'REPAIR_TRUCK'; payload: string }
+    | { type: 'GENERATE_CONTRACTS'; payload: { count: number, currentTime: number } };
 
 const initialState: State = {
     game: INITIAL_GAME_STATE,
@@ -64,8 +65,11 @@ function gameReducer(state: State, action: Action): State {
     switch (action.type) {
         case 'TOGGLE_PAUSE':
             return { ...state, game: { ...state.game, paused: !state.game.paused } };
-        case 'SET_SPEED':
-            return { ...state, game: { ...state.game, gameSpeed: action.payload } };
+        case 'SET_SPEED': {
+            const speed = action.payload;
+            if (![1, 3, 10].includes(speed)) return state;
+            return { ...state, game: { ...state.game, gameSpeed: speed } };
+        }
 
         case 'TICK': {
             if (state.game.paused) return state;
@@ -75,6 +79,14 @@ function gameReducer(state: State, action: Action): State {
             let moneyEarned = 0;
             let moneySpent = 0;
             let completedContracts: string[] = [];
+
+            // 1. Auto-generate contracts every 8 hours
+            // 8 hours = 28,800,000 ms
+            const lastGen = state.game.lastJobGenerationTime || 0;
+            const shouldGenerate = lastGen === 0 || newTime - lastGen >= 28800000;
+
+            // 2. Clear expired contracts
+            const unexpiredContracts = state.contracts.filter(c => c.expiresAt > newTime);
 
             // Check for daily loan payments (Every 24h = 86400000ms)
             // We need to track the last payment time.
@@ -187,17 +199,50 @@ function gameReducer(state: State, action: Action): State {
                 return nextTruck;
             });
 
-            return {
+            let nextState = {
                 ...state,
                 game: {
                     ...state.game,
                     time: newTime,
                     money: state.game.money + moneyEarned - moneySpent,
-                    lastInfluenceTime: newLastInfluenceTime
+                    lastInfluenceTime: newLastInfluenceTime,
+                    lastJobGenerationTime: shouldGenerate ? newTime : state.game.lastJobGenerationTime
                 },
                 trucks: newTrucks,
-                activeContracts: state.activeContracts.filter(c => !completedContracts.includes(c.id))
+                activeContracts: state.activeContracts.filter(c => !completedContracts.includes(c.id)),
+                contracts: unexpiredContracts
             };
+
+            // Recursively trigger generation if needed (simpler to just do it here for now)
+            if (shouldGenerate) {
+                const newContracts: Contract[] = [];
+                for (let i = 0; i < 5; i++) {
+                    const startCity = CITIES[Math.floor(Math.random() * CITIES.length)];
+                    let endCity = CITIES[Math.floor(Math.random() * CITIES.length)];
+                    while (startCity.id === endCity.id) {
+                        endCity = CITIES[Math.floor(Math.random() * CITIES.length)];
+                    }
+
+                    const dist = getDistance(startCity.coordinates, endCity.coordinates);
+                    const reward = Math.floor(dist * 2.5 + 500);
+
+                    // Expirations: 3, 5, 8 hours
+                    const expHours = [3, 5, 8][Math.floor(Math.random() * 3)];
+
+                    newContracts.push({
+                        id: `c-${newTime}-${i}`,
+                        sourceCityId: startCity.id,
+                        destCityId: endCity.id,
+                        cargo: 'General Freight',
+                        reward: reward,
+                        distance: dist,
+                        expiresAt: newTime + (expHours * 3600000)
+                    });
+                }
+                nextState.contracts = [...nextState.contracts, ...newContracts];
+            }
+
+            return nextState;
         }
 
         case 'ADD_CONTRACT':

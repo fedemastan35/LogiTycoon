@@ -168,9 +168,15 @@ export const MapView: React.FC = () => {
                             icon={truck.status === 'MOVING_TO_SOURCE' ? truckIconEmpty : truckIcon}
                         >
                             <Popup className="glass-popup">
-                                <div className="p-2">
-                                    <h3 className="font-bold text-slate-800">{truck.name}</h3>
-                                    <p className="text-xs text-slate-600">{truck.status}</p>
+                                <div className="p-3 min-w-[120px] bg-slate-900/95 border border-slate-700/50 rounded-lg shadow-2xl backdrop-blur-md">
+                                    <h3 className="font-black text-white uppercase tracking-tight text-sm border-b border-white/10 pb-1 mb-2">{truck.name}</h3>
+                                    <div className="flex items-center gap-2">
+                                        <span className={`w-2 h-2 rounded-full ${truck.status === 'IDLE' ? 'bg-slate-500' : 'bg-blue-400 animate-pulse'}`}></span>
+                                        <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">{truck.status}</span>
+                                    </div>
+                                    <div className="mt-2 text-[10px] text-slate-500 font-mono">
+                                        HQ: {truck.homeHqId || 'UNASSIGNED'}
+                                    </div>
                                 </div>
                             </Popup>
                         </Marker>
@@ -190,21 +196,21 @@ export const MapView: React.FC = () => {
                     </React.Fragment>
                 ))}
 
-                {/* HQ Marker */}
-                {(() => {
-                    const hqCity = CITIES.find(c => state.game.hqLocation.startsWith(c.name));
+                {/* HQ Markers */}
+                {game.hqLocations.map((loc, i) => {
+                    const hqCity = CITIES.find(c => loc.startsWith(c.name));
                     if (!hqCity) return null;
                     return (
-                        <Marker position={[hqCity.coordinates.lat, hqCity.coordinates.lng]} icon={hqIcon} zIndexOffset={1000}>
+                        <Marker key={`hq-${i}`} position={[hqCity.coordinates.lat, hqCity.coordinates.lng]} icon={hqIcon} zIndexOffset={1000}>
                             <Popup className="glass-popup">
-                                <div className="p-2">
-                                    <h3 className="font-bold text-slate-800">Company HQ</h3>
-                                    <p className="text-xs text-slate-600">{hqCity.name}</p>
+                                <div className="p-3 bg-slate-900 border border-blue-500/30 rounded-lg">
+                                    <h3 className="font-black text-white uppercase tracking-tighter text-sm">Company HQ</h3>
+                                    <p className="text-[10px] font-bold text-blue-400 uppercase tracking-widest">{hqCity.name}</p>
                                 </div>
                             </Popup>
                         </Marker>
                     );
-                })()}
+                })}
 
             </MapContainer>
         </div>

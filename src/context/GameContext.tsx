@@ -27,7 +27,8 @@ type Action =
     | { type: 'SET_HQ'; payload: string }
     | { type: 'COMPLETE_CONTRACT'; payload: string }
     | { type: 'REPAIR_TRUCK'; payload: string }
-    | { type: 'GENERATE_CONTRACTS'; payload: { count: number, currentTime: number } };
+    | { type: 'GENERATE_CONTRACTS'; payload: { count: number, currentTime: number } }
+    | { type: 'ASSIGN_TO_HQ'; payload: { id: string, type: 'TRUCK' | 'DRIVER', hqId: string } };
 
 const initialState: State = {
     game: INITIAL_GAME_STATE,
@@ -41,7 +42,7 @@ const initialState: State = {
         { id: 'd-4', name: 'Sam Slow', salary: 50, skill: 1, status: 'IDLE' },
     ],
     hiredDrivers: [
-        { id: 'd-initial', name: 'You (Owner)', salary: 0, skill: 5, status: 'ASSIGNED', assignedTruckId: 't-1' }
+        { id: 'd-initial', name: 'You (Owner)', salary: 0, skill: 5, status: 'ASSIGNED', assignedTruckId: 't-1', homeHqId: undefined }
     ]
 };
 
@@ -104,6 +105,18 @@ function gameReducer(state: State, action: Action): State {
                 state.hiredDrivers.forEach(driver => {
                     moneySpent += driver.salary;
                 });
+
+                // Spawn new drivers in the market
+                const driverNames = ["Alex", "Jordan", "Taylor", "Morgan", "Casey", "Riley", "Quinn"];
+                const newDriver: import('../types').Driver = {
+                    id: `d-${newTime}`,
+                    name: driverNames[Math.floor(Math.random() * driverNames.length)] + " " + (["A", "B", "C"][Math.floor(Math.random() * 3)]),
+                    salary: Math.floor(Math.random() * 200) + 50,
+                    skill: Math.floor(Math.random() * 5) + 1,
+                    status: 'IDLE'
+                };
+                // Keep market capped at 8
+                state.availableDrivers = [newDriver, ...state.availableDrivers].slice(0, 8);
             }
 
             const newTrucks = state.trucks.map(truck => {
@@ -421,17 +434,19 @@ function gameReducer(state: State, action: Action): State {
 
         case 'SET_HQ': {
             const hqLocation = action.payload;
-            const isFirstHq = state.game.hqLocation === "";
-            const cost = isFirstHq ? 0 : 10000;
+            const isFirstHq = state.game.hqLocations.length === 0;
+            const cost = isFirstHq ? 0 : 500000;
             if (state.game.money < cost) return state;
 
             return {
                 ...state,
                 game: {
                     ...state.game,
-                    hqLocation,
+                    hqLocations: [...state.game.hqLocations, hqLocation],
                     money: state.game.money - cost
-                }
+                },
+                trucks: state.trucks.map(t => isFirstHq && !t.homeHqId ? { ...t, homeHqId: hqLocation } : t),
+                hiredDrivers: state.hiredDrivers.map(d => isFirstHq && !d.homeHqId ? { ...d, homeHqId: hqLocation } : d)
             };
         }
 
@@ -453,6 +468,21 @@ function gameReducer(state: State, action: Action): State {
                     t.id === truckId ? { ...t, condition: 100 } : t
                 )
             };
+        }
+
+        case 'ASSIGN_TO_HQ' as any: {
+            const { id, type, hqId } = action.payload as any;
+            if (type === 'TRUCK') {
+                return {
+                    ...state,
+                    trucks: state.trucks.map(t => t.id === id ? { ...t, homeHqId: hqId } : t)
+                };
+            } else {
+                return {
+                    ...state,
+                    hiredDrivers: state.hiredDrivers.map(d => d.id === id ? { ...d, homeHqId: hqId } : d)
+                };
+            }
         }
 
         default:

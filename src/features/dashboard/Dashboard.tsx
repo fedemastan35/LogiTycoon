@@ -123,8 +123,8 @@ export const Dashboard: React.FC<{ className?: string }> = ({ className }) => {
 
                 {/* Company Status */}
                 <div className="glass-panel p-6 flex flex-col justify-between relative overflow-hidden">
-                    {/* HQ Selection Overlay */}
-                    {game.hqLocation === "" && (
+                    {/* HQ Selection Overlay (First One) */}
+                    {game.hqLocations.length === 0 && (
                         <div className="absolute inset-0 bg-slate-900/95 z-50 flex flex-col p-6 animate-slide-in">
                             <div className="mb-4">
                                 <h4 className="text-lg font-bold text-white uppercase tracking-tight">Establish Headquarters</h4>
@@ -160,40 +160,37 @@ export const Dashboard: React.FC<{ className?: string }> = ({ className }) => {
                             <span className="font-bold text-amber-400">{game.reputation}</span>
                         </div>
 
-                        <div className="flex justify-between items-center group cursor-default">
+                        <div className="flex flex-col gap-2 group cursor-default">
                             <div className="flex items-center gap-3 text-slate-400 text-sm">
                                 <MapPin size={18} />
-                                <span>HQ Location</span>
+                                <span>HQ Locations ({game.hqLocations.length})</span>
                             </div>
-                            <div className="flex items-center gap-2">
-                                <span className="font-bold text-slate-200">{game.hqLocation}</span>
-                                <button
-                                    onClick={() => dispatch({ type: 'SET_HQ_MODE' as any })} // We'll add this to open a list
-                                    className="p-1 hover:bg-slate-800 rounded text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity"
-                                    title="Relocate HQ (€10,000)"
-                                >
-                                    <TrendingUp size={14} />
-                                </button>
+                            <div className="flex flex-wrap gap-2">
+                                {game.hqLocations.map((loc, i) => (
+                                    <span key={i} className="text-xs font-bold px-2 py-1 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded">
+                                        {loc}
+                                    </span>
+                                ))}
                             </div>
                         </div>
 
-                        {/* Inline Selector for HQ (Simple version for now) */}
-                        <div className="space-y-2 max-h-40 overflow-y-auto custom-scrollbar p-2 bg-slate-900/50 rounded-lg border border-slate-800">
+                        {/* Multi-HQ Expansion Selector */}
+                        <div className="space-y-2 max-h-48 overflow-y-auto custom-scrollbar p-3 bg-slate-900/50 rounded-xl border border-slate-800">
                             <div className="text-[10px] font-bold text-slate-500 uppercase flex justify-between">
-                                <span>Relocate HQ</span>
-                                <span>Cost: €10,000</span>
+                                <span>Expand HQ Network</span>
+                                <span className="text-amber-500">Cost: €500,000</span>
                             </div>
-                            {CITIES.filter(c => `${c.name}, ${c.id.split('-')[0].toUpperCase()}` !== game.hqLocation).map(city => {
+                            {CITIES.filter(c => !game.hqLocations.some(l => l.startsWith(c.name))).map(city => {
                                 const cityLabel = `${city.name}, ${city.id.split('-')[0].toUpperCase()}`;
                                 return (
                                     <button
                                         key={city.id}
                                         onClick={() => dispatch({ type: 'SET_HQ', payload: cityLabel })}
-                                        disabled={game.money < 10000}
-                                        className="w-full text-left p-2 rounded hover:bg-slate-800 text-xs text-slate-300 flex justify-between items-center transition-colors disabled:opacity-30"
+                                        disabled={game.money < 500000}
+                                        className="w-full text-left p-2 rounded hover:bg-slate-800 text-xs text-slate-300 flex justify-between items-center transition-colors disabled:opacity-30 group"
                                     >
                                         <span>{city.name}</span>
-                                        <TrendingUp size={12} className="text-blue-500" />
+                                        <TrendingUp size={12} className="text-slate-600 group-hover:text-blue-500" />
                                     </button>
                                 );
                             })}

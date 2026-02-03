@@ -129,10 +129,27 @@ export const FleetList: React.FC<{ className?: string }> = ({ className }) => {
                                                 </div>
                                             </div>
 
+                                            {/* HQ Alignment */}
+                                            <div className="flex justify-between items-center border-t border-slate-800/50 pt-3">
+                                                <span className="text-[10px] font-bold text-slate-500 uppercase flex items-center gap-1">
+                                                    <MapPin size={10} /> Home Base
+                                                </span>
+                                                <select
+                                                    value={truck.homeHqId || ''}
+                                                    onChange={(e) => dispatch({ type: 'ASSIGN_TO_HQ' as any, payload: { id: truck.id, type: 'TRUCK', hqId: e.target.value } })}
+                                                    className="bg-transparent text-xs font-bold text-blue-400 focus:outline-none cursor-pointer"
+                                                >
+                                                    <option value="" disabled className="bg-slate-900">Assign HQ</option>
+                                                    {game.hqLocations.map(loc => (
+                                                        <option key={loc} value={loc} className="bg-slate-900">{loc}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
+
                                             {/* Location */}
                                             <div className="flex justify-between items-center border-t border-slate-800/50 pt-3">
                                                 <span className="text-[10px] font-bold text-slate-500 uppercase flex items-center gap-1">
-                                                    <MapPin size={10} /> Location
+                                                    <Gauge size={10} /> Location
                                                 </span>
                                                 <span className="text-xs font-bold text-slate-300">
                                                     {getClosestCity(truck.location, CITIES)}
@@ -167,8 +184,18 @@ export const FleetList: React.FC<{ className?: string }> = ({ className }) => {
                                     </div>
                                 </div>
                                 <div className="text-right">
-                                    <div className="text-[10px] font-bold text-slate-500 uppercase">Salary</div>
-                                    <div className="text-xs font-bold text-emerald-400">€{driver.salary}/day</div>
+                                    <div className="text-[10px] font-bold text-slate-500 uppercase">Home Base</div>
+                                    <select
+                                        value={driver.homeHqId || ''}
+                                        onChange={(e) => dispatch({ type: 'ASSIGN_TO_HQ' as any, payload: { id: driver.id, type: 'DRIVER', hqId: e.target.value } })}
+                                        className="bg-transparent text-xs font-bold text-blue-400 focus:outline-none cursor-pointer text-right"
+                                    >
+                                        <option value="" disabled className="bg-slate-900">Assign HQ</option>
+                                        {game.hqLocations.map(loc => (
+                                            <option key={loc} value={loc} className="bg-slate-900">{loc}</option>
+                                        ))}
+                                    </select>
+                                    <div className="text-xs font-bold text-emerald-400 mt-1">€{driver.salary}/day</div>
                                 </div>
                             </div>
                         ))}

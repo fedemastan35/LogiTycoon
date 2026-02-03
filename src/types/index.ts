@@ -26,6 +26,7 @@ export interface Truck {
     pendingRoutePath?: Coordinates[]; // For the next leg (e.g. Cargo run after deadhead)
     driverId?: string;
     condition: number; // 0-100
+    homeHqId?: string; // ID of the HQ this truck belongs to
 }
 
 export interface Driver {
@@ -35,6 +36,7 @@ export interface Driver {
     skill: number; // 1-5, affects fuel efficiency and speed?
     status: 'IDLE' | 'ASSIGNED';
     assignedTruckId?: string;
+    homeHqId?: string; // ID of the HQ this driver belongs to
 }
 
 export interface Contract {
@@ -64,7 +66,7 @@ export interface GameState {
     lastInfluenceTime?: number; // Track daily updates
     // Company Details
     companyName: string;
-    hqLocation: string;
+    hqLocations: string[]; // List of HQ city labels (e.g. "London, UK")
     foundedDate: string;
     reputation: 'Poor' | 'Small' | 'Good' | 'Excellent' | 'Elite';
     reputationPoints: number;

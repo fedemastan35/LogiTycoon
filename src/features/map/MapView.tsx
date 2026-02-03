@@ -65,6 +65,10 @@ export const MapView: React.FC = () => {
                 zoom={4}
                 style={{ height: '100%', width: '100%', background: '#0f172a' }}
                 attributionControl={false}
+                zoomControl={false}
+                minZoom={4}
+                maxBounds={[[30, -20], [72, 45]]} // Europe + North Africa bounds
+                maxBoundsViscosity={1.0}
             >
                 <TileLayer
                     // Dark Matter style tiles for "premium" look

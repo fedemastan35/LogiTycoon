@@ -60,7 +60,7 @@ const GameControls = ({ showUI, setShowUI }: { showUI: boolean, setShowUI: (v: b
 
       <div className="flex flex-col text-right mr-2">
         <span className="text-xs text-slate-400 hidden sm:inline">Balance</span>
-        <span className="text-sm font-bold text-green-400">€ {state.game.money.toLocaleString()}</span>
+        <span className="text-sm font-bold text-green-400">€ {state.game.money.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
       </div>
 
       <button
@@ -92,13 +92,15 @@ const UIOverlay = () => {
   return (
     <div className="absolute inset-0 pointer-events-none flex flex-col">
       {/* Top Bar - Always Visible (contains toggle) */}
-      <div className="w-full p-2 lg:p-4 flex justify-between items-start pointer-events-auto z-30">
-        <div className={`glass-panel px-3 py-2 lg:px-4 transition-opacity duration-300 ${showUI ? 'opacity-100' : 'opacity-0'}`}>
+      <div className="w-full p-2 lg:p-4 flex justify-between items-start pointer-events-auto z-30 relative">
+        <div className={`glass-panel px-3 py-2 lg:px-4 transition-opacity duration-300 absolute left-1/2 -translate-x-1/2 ${showUI ? 'opacity-100' : 'opacity-0'}`}>
           <h1 className="text-lg font-bold bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent">
             LOGI<span className="text-white">TYCOON</span>
           </h1>
         </div>
-        <GameControls showUI={showUI} setShowUI={setShowUI} />
+        <div className="ml-auto">
+          <GameControls showUI={showUI} setShowUI={setShowUI} />
+        </div>
       </div>
 
       {/* Main Content Area */}

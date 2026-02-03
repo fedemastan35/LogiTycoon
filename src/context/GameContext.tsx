@@ -112,16 +112,14 @@ function gameReducer(state: State, action: Action): State {
                 const hoursPassed = timeAdvance / 3600000;
                 let distToMove = truck.speed * hoursPassed; // Distance we can travel this tick
 
-                // Fuel Costs
-                // Base cost: 1 EUR per km.
+                // Fuel Costs (REBALANCED)
+                // Base cost: 1.2 EUR per km (was 1.5).
                 // Skill 1: 1.2x, Skill 5: 0.8x
                 const driver = state.hiredDrivers.find(d => d.id === truck.driverId);
                 const skill = driver ? driver.skill : 1;
-                const costMultiplier = 1.3 - (skill * 0.1); // 1->1.2, 5->0.8
+                const costMultiplier = 1.3 - (skill * 0.1);
 
-                // Calculate roughly how much we moved this tick (optimized: just use distToMove for cost approximation)
-                // Real distance might be less if we arrive, but close enough.
-                const fuelCost = distToMove * 1.5 * costMultiplier;
+                const fuelCost = distToMove * 1.2 * costMultiplier;
                 moneySpent += fuelCost;
 
                 let nextTruck = { ...truck };
@@ -224,7 +222,7 @@ function gameReducer(state: State, action: Action): State {
                     }
 
                     const dist = getDistance(startCity.coordinates, endCity.coordinates);
-                    const reward = Math.floor(dist * 2.5 + 500);
+                    const reward = Math.floor(dist * 6.5 + 2000); // REBALANCED: dist * 6.5 + 2000 (was dist * 2.5 + 500)
 
                     // Expirations: 3, 5, 8 hours
                     const expHours = [3, 5, 8][Math.floor(Math.random() * 3)];
@@ -398,16 +396,17 @@ function gameReducer(state: State, action: Action): State {
             const newPoints = state.game.reputationPoints + 1;
             let newReputation = state.game.reputation;
 
-            if (newPoints >= 40) newReputation = 'Elite';
-            else if (newPoints >= 20) newReputation = 'Excellent';
-            else if (newPoints >= 10) newReputation = 'Good';
-            else if (newPoints >= 5) newReputation = 'Small';
+            let levelBonus = 0;
+            if (newPoints === 5) { newReputation = 'Small'; levelBonus = 5000; }
+            else if (newPoints === 10) { newReputation = 'Good'; levelBonus = 15000; }
+            else if (newPoints === 20) { newReputation = 'Excellent'; levelBonus = 50000; }
+            else if (newPoints === 40) { newReputation = 'Elite'; levelBonus = 250000; }
 
             return {
                 ...state,
                 game: {
                     ...state.game,
-                    money: state.game.money + contract.reward,
+                    money: state.game.money + contract.reward + levelBonus,
                     reputationPoints: newPoints,
                     reputation: newReputation
                 },
@@ -441,7 +440,7 @@ function gameReducer(state: State, action: Action): State {
             const truck = state.trucks.find(t => t.id === truckId);
             if (!truck) return state;
 
-            const repairCost = (100 - truck.condition) * 50; // €50 per 1% damage
+            const repairCost = (100 - truck.condition) * 30; // REBALANCED: €30 per 1% damage (was €50)
             if (state.game.money < repairCost) return state;
 
             return {

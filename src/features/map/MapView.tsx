@@ -4,6 +4,8 @@ import L from 'leaflet';
 import { useGame } from '../../context/GameContext';
 import { CITIES } from '../../data/cities';
 import { CONNECTIONS } from '../../data/connections';
+import { getRoute } from '../../services/routing';
+import { Coordinates } from '../../types';
 import 'leaflet/dist/leaflet.css';
 
 // Fix Leaflet generic marker icon
@@ -78,6 +80,38 @@ const hqIcon = new L.DivIcon({
 export const MapView: React.FC = () => {
     const { state } = useGame();
     const { trucks } = state;
+    const [roadPaths, setRoadPaths] = React.useState<Record<string, Coordinates[]>>({});
+
+    // Fetch and cache road network paths
+    React.useEffect(() => {
+        const fetchRoads = async () => {
+            const newPaths: Record<string, Coordinates[]> = { ...roadPaths };
+            let changed = false;
+
+            for (const conn of CONNECTIONS) {
+                const key = `${conn.from}-${conn.to}`;
+                if (newPaths[key]) continue;
+
+                const fromCity = CITIES.find(c => c.id === conn.from);
+                const toCity = CITIES.find(c => c.id === conn.to);
+                if (!fromCity || !toCity) continue;
+
+                try {
+                    const path = await getRoute(fromCity.coordinates, toCity.coordinates);
+                    newPaths[key] = path;
+                    changed = true;
+                } catch (e) {
+                    console.error(`Failed to fetch road for ${key}`, e);
+                }
+            }
+
+            if (changed) {
+                setRoadPaths(newPaths);
+            }
+        };
+
+        fetchRoads();
+    }, []);
 
     return (
         <div className="absolute inset-0 w-full h-full z-0" style={{ backgroundColor: '#0f172a' }}>
@@ -97,23 +131,21 @@ export const MapView: React.FC = () => {
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
                 />
 
-                {/* Background Road Network */}
-                {CONNECTIONS.map((conn, idx) => {
-                    const fromCity = CITIES.find(c => c.id === conn.from);
-                    const toCity = CITIES.find(c => c.id === conn.to);
-                    if (!fromCity || !toCity) return null;
+                {/* Real Road Network (Background) */}
+                {CONNECTIONS.map((conn) => {
+                    const key = `${conn.from}-${conn.to}`;
+                    const path = roadPaths[key];
+                    if (!path) return null;
+
                     return (
                         <Polyline
-                            key={`road-${idx}`}
-                            positions={[
-                                [fromCity.coordinates.lat, fromCity.coordinates.lng],
-                                [toCity.coordinates.lat, toCity.coordinates.lng]
-                            ]}
+                            key={`road-${key}`}
+                            positions={path.map(c => [c.lat, c.lng])}
                             pathOptions={{
-                                color: '#475569', // Slate 600
+                                color: '#94a3b8', // Slate 400 - much more visible grey
                                 weight: 1.5,
-                                opacity: 0.4,
-                                dashArray: '1, 3' // Subtle dotted/dashed look for background
+                                opacity: 0.3,
+                                lineJoin: 'round'
                             }}
                         />
                     );
@@ -149,8 +181,9 @@ export const MapView: React.FC = () => {
                                 positions={truck.routePath.map(c => [c.lat, c.lng])}
                                 pathOptions={{
                                     color: truck.status === 'MOVING' ? '#3b82f6' : '#eab308',
-                                    weight: 3,
-                                    opacity: 0.7
+                                    weight: 4, // Thicker for active routes
+                                    opacity: 0.8,
+                                    lineJoin: 'round'
                                 }}
                             />
                         )}

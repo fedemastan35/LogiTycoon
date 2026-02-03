@@ -24,7 +24,8 @@ type Action =
     | { type: 'REPAY_LOAN'; payload: string }
     | { type: 'HIRE_DRIVER'; payload: string }
     | { type: 'ASSIGN_DRIVER'; payload: { driverId: string; truckId: string } }
-    | { type: 'SET_HQ'; payload: string };
+    | { type: 'SET_HQ'; payload: string }
+    | { type: 'COMPLETE_CONTRACT'; payload: string };
 
 const initialState: State = {
     game: INITIAL_GAME_STATE,
@@ -338,9 +339,40 @@ function gameReducer(state: State, action: Action): State {
             };
         }
 
+        case 'COMPLETE_CONTRACT': {
+            const contractId = action.payload;
+            const contract = state.activeContracts.find(c => c.id === contractId);
+            if (!contract) return state;
+
+            const newPoints = state.game.reputationPoints + 1;
+            let newReputation = state.game.reputation;
+
+            if (newPoints >= 40) newReputation = 'Elite';
+            else if (newPoints >= 20) newReputation = 'Excellent';
+            else if (newPoints >= 10) newReputation = 'Good';
+            else if (newPoints >= 5) newReputation = 'Small';
+
+            return {
+                ...state,
+                game: {
+                    ...state.game,
+                    money: state.game.money + contract.reward,
+                    reputationPoints: newPoints,
+                    reputation: newReputation
+                },
+                activeContracts: state.activeContracts.filter(c => c.id !== contractId),
+                trucks: state.trucks.map(t =>
+                    t.currentContractId === contractId
+                        ? { ...t, status: 'IDLE', currentContractId: undefined }
+                        : t
+                )
+            };
+        }
+
         case 'SET_HQ': {
             const hqLocation = action.payload;
-            const cost = 10000;
+            const isFirstHq = state.game.hqLocation === "";
+            const cost = isFirstHq ? 0 : 10000;
             if (state.game.money < cost) return state;
 
             return {

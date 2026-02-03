@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useGame } from '../../context/GameContext';
-import { Truck as TruckIcon, MapPin, Navigation } from 'lucide-react';
+import { Truck as TruckIcon, MapPin, Gauge, ShieldCheck } from 'lucide-react';
 
 export const FleetList: React.FC<{ className?: string }> = ({ className }) => {
     const { state, dispatch } = useGame();
-    const { trucks, game } = state;
+    const { trucks, game, hiredDrivers } = state;
+    const [tab, setTab] = useState<'TRUCKS' | 'DRIVERS'>('TRUCKS');
 
     const buyTruck = () => {
         if (game.money >= 50000) {
@@ -12,74 +13,150 @@ export const FleetList: React.FC<{ className?: string }> = ({ className }) => {
                 type: 'BUY_TRUCK',
                 payload: {
                     id: `t-${Date.now()}`,
-                    name: `Volvo FH16 #${trucks.length + 1}`,
+                    name: `MAN TGX #${trucks.length + 1}`,
                     speed: 80,
                     status: 'IDLE',
-                    location: { lat: 51.5074, lng: -0.1278 } // New trucks in London for now
+                    location: { lat: 51.5074, lng: -0.1278 }, // London default
+                    condition: 100,
                 }
             });
         }
     };
 
     return (
-        <div className={className || "glass-panel w-96 h-full p-4 pointer-events-auto animate-slide-in flex flex-col"}>
-            <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-bold">Fleet Management</h2>
-                <div className="text-xs text-slate-400">{trucks.length} Trucks</div>
+        <div className={className || "glass-panel w-full lg:w-[500px] h-full p-6 pointer-events-auto animate-slide-in flex flex-col gap-6"}>
+            {/* Header */}
+            <div>
+                <h2 className="text-3xl font-black bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent uppercase tracking-tighter">
+                    Fleet Management
+                </h2>
+                <p className="text-slate-500 text-sm">Manage your vehicles and personnel.</p>
             </div>
 
-            <div className="flex-1 overflow-y-auto space-y-3 pr-2 custom-scrollbar">
-                {trucks.map(truck => (
-                    <div key={truck.id} className="p-3 bg-slate-800/50 rounded border border-slate-700 hover:border-slate-500 transition-colors">
-                        <div className="flex justify-between items-start mb-2">
-                            <div className="flex items-center gap-2">
-                                <TruckIcon size={16} className="text-blue-400" />
-                                <span className="font-bold text-sm">{truck.name}</span>
-                            </div>
-                            <span className={`text-[10px] px-1.5 py-0.5 rounded border ${truck.status === 'MOVING' ? 'border-green-500/30 text-green-400 bg-green-500/10' :
-                                truck.status === 'MOVING_TO_SOURCE' ? 'border-yellow-500/30 text-yellow-400 bg-yellow-500/10' :
-                                    'border-slate-500/30 text-slate-400 bg-slate-500/10'
-                                }`}>
-                                {truck.status === 'MOVING_TO_SOURCE' ? 'DISPATCHING' : truck.status}
-                            </span>
-                        </div>
-
-                        <div className="flex items-center gap-2 text-xs text-slate-400">
-                            <MapPin size={12} />
-                            <span>{truck.location.lat.toFixed(2)}, {truck.location.lng.toFixed(2)}</span>
-                        </div>
-
-                        {truck.status === 'MOVING' && truck.destination && (
-                            <div className="flex items-center gap-2 text-xs text-blue-300 mt-1">
-                                <Navigation size={12} />
-                                <span>Driving to destination...</span>
-                            </div>
-                        )}
-
-                        {truck.status === 'MOVING_TO_SOURCE' && truck.destination && (
-                            <div className="flex items-center gap-2 text-xs text-yellow-300 mt-1">
-                                <Navigation size={12} />
-                                <span>Deadheading to pickup...</span>
-                            </div>
-                        )}
-                    </div>
-                ))}
-            </div>
-
-            <div className="mt-4 pt-4 border-t border-slate-700">
+            {/* Tabs */}
+            <div className="flex bg-slate-900/50 p-1 rounded-xl border border-slate-800">
                 <button
-                    onClick={buyTruck}
-                    disabled={game.money < 50000}
-                    className={`w-full py-2 rounded font-bold text-sm transition-all flex justify-between px-4
-                        ${game.money >= 50000
-                            ? 'bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-500/20'
-                            : 'bg-slate-800 text-slate-500 cursor-not-allowed'}
-                    `}
+                    onClick={() => setTab('TRUCKS')}
+                    className={`flex-1 py-2.5 rounded-lg text-xs font-bold transition-all ${tab === 'TRUCKS' ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20' : 'text-slate-500 hover:text-slate-300'}`}
                 >
-                    <span>Buy New Truck</span>
-                    <span>€ 50,000</span>
+                    Trucks
+                </button>
+                <button
+                    onClick={() => setTab('DRIVERS')}
+                    className={`flex-1 py-2.5 rounded-lg text-xs font-bold transition-all ${tab === 'DRIVERS' ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20' : 'text-slate-500 hover:text-slate-300'}`}
+                >
+                    Drivers
                 </button>
             </div>
+
+            {tab === 'TRUCKS' ? (
+                <>
+                    <div className="flex justify-between items-center">
+                        <h3 className="text-sm font-black text-slate-200 uppercase tracking-widest">
+                            Owned Vehicles ({trucks.length})
+                        </h3>
+                        <button
+                            onClick={buyTruck}
+                            disabled={game.money < 50000}
+                            className="text-[10px] font-bold text-blue-400 hover:text-blue-300 disabled:opacity-30 transition-colors uppercase tracking-widest"
+                        >
+                            + Buy New Vehicle
+                        </button>
+                    </div>
+
+                    <div className="flex-1 overflow-y-auto space-y-4 pr-1 custom-scrollbar">
+                        {trucks.length === 0 ? (
+                            <div className="h-40 flex flex-col items-center justify-center text-slate-600 border border-dashed border-slate-800 rounded-2xl">
+                                <TruckIcon size={32} className="mb-2 opacity-20" />
+                                <span className="text-sm italic">No vehicles in fleet</span>
+                            </div>
+                        ) : (
+                            trucks.map(truck => (
+                                <div key={truck.id} className="bg-slate-900/60 rounded-2xl border border-slate-800 overflow-hidden flex flex-col group hover:border-slate-700 transition-all">
+                                    {/* Icon Top Section */}
+                                    <div className="h-24 bg-gradient-to-b from-slate-800/50 to-transparent flex items-center justify-center relative">
+                                        <TruckIcon size={48} className="text-slate-700 group-hover:scale-110 group-hover:text-slate-600 transition-all" />
+                                        <div className="absolute top-3 right-3">
+                                            <span className={`text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-tighter shadow-sm
+                                                ${truck.status === 'MOVING' || truck.status === 'MOVING_TO_SOURCE'
+                                                    ? 'bg-amber-500 text-slate-950'
+                                                    : 'bg-slate-800 text-slate-400'}
+                                             `}>
+                                                {truck.status === 'MOVING' || truck.status === 'MOVING_TO_SOURCE' ? 'ON_JOB' : truck.status}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    {/* Info Section */}
+                                    <div className="p-4 pt-0">
+                                        <div className="mb-4">
+                                            <h4 className="text-lg font-black text-white uppercase tracking-tight">{truck.name}</h4>
+                                            <span className="text-[10px] font-mono text-slate-500 uppercase">{truck.id}</span>
+                                        </div>
+
+                                        <div className="space-y-4">
+                                            {/* Condition Bar */}
+                                            <div className="space-y-1">
+                                                <div className="flex justify-between items-center text-[10px] font-bold uppercase">
+                                                    <span className="text-slate-500 flex items-center gap-1">
+                                                        <Gauge size={10} /> Condition
+                                                    </span>
+                                                    <span className="text-white">{truck.condition}%</span>
+                                                </div>
+                                                <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
+                                                    <div
+                                                        className="h-full bg-amber-500 transition-all duration-500 ease-out"
+                                                        style={{ width: `${truck.condition}%` }}
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            {/* Location */}
+                                            <div className="flex justify-between items-center border-t border-slate-800/50 pt-3">
+                                                <span className="text-[10px] font-bold text-slate-500 uppercase flex items-center gap-1">
+                                                    <MapPin size={10} /> Location
+                                                </span>
+                                                <span className="text-xs font-bold text-slate-300">
+                                                    {Math.abs(truck.location.lat).toFixed(1)}°{truck.location.lat > 0 ? 'N' : 'S'}, {Math.abs(truck.location.lng).toFixed(1)}°{truck.location.lng > 0 ? 'E' : 'W'}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))
+                        )}
+                    </div>
+                </>
+            ) : (
+                <>
+                    <div className="flex justify-between items-center">
+                        <h3 className="text-sm font-black text-slate-200 uppercase tracking-widest">
+                            Staff Directory ({hiredDrivers.length})
+                        </h3>
+                    </div>
+                    <div className="flex-1 overflow-y-auto space-y-3 pr-1 custom-scrollbar">
+                        {hiredDrivers.map(driver => (
+                            <div key={driver.id} className="glass-panel p-4 flex justify-between items-center group">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center overflow-hidden border border-slate-700">
+                                        <div className="text-xs font-bold text-slate-500">{driver.name.charAt(0)}</div>
+                                    </div>
+                                    <div>
+                                        <div className="font-bold text-sm text-slate-200">{driver.name}</div>
+                                        <div className="text-[10px] text-slate-500 uppercase font-bold flex items-center gap-1">
+                                            <ShieldCheck size={10} className="text-blue-500" /> Skill Level {driver.skill}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="text-right">
+                                    <div className="text-[10px] font-bold text-slate-500 uppercase">Salary</div>
+                                    <div className="text-xs font-bold text-emerald-400">€{driver.salary}/day</div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </>
+            )}
         </div>
     );
 };

@@ -25,6 +25,7 @@ export interface Truck {
     routeIndex?: number; // Current target index in path
     pendingRoutePath?: Coordinates[]; // For the next leg (e.g. Cargo run after deadhead)
     driverId?: string;
+    condition: number; // 0-100
 }
 
 export interface Driver {
@@ -65,5 +66,6 @@ export interface GameState {
     companyName: string;
     hqLocation: string;
     foundedDate: string;
-    reputation: 'Small' | 'Good' | 'Excellent' | 'Elite';
+    reputation: 'Poor' | 'Small' | 'Good' | 'Excellent' | 'Elite';
+    reputationPoints: number;
 }

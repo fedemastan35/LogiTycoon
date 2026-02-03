@@ -9,9 +9,10 @@ export const INITIAL_GAME_STATE: GameState = {
     loans: [],
     // Company Details
     companyName: 'LogiCorp',
-    hqLocation: 'London, UK',
+    hqLocation: '',
     foundedDate: '2/2/2026',
-    reputation: 'Excellent',
+    reputation: 'Poor',
+    reputationPoints: 0,
 };
 
 export const INITIAL_TRUCKS: Truck[] = [
@@ -21,5 +22,6 @@ export const INITIAL_TRUCKS: Truck[] = [
         speed: 80,
         status: 'IDLE',
         location: CITIES[0].coordinates, // Start in London
+        condition: 100,
     }
 ];

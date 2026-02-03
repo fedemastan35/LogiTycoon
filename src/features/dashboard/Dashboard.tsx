@@ -111,8 +111,8 @@ export const Dashboard: React.FC<{ className?: string }> = ({ className }) => {
                                             <span className="text-xs text-slate-500 mt-1">{contract.cargo}</span>
                                         </div>
                                         <div className="text-right">
-                                            <div className="font-bold text-amber-500">€{contract.reward.toLocaleString()}</div>
-                                            <div className="text-[10px] text-slate-600 uppercase font-bold">{contract.distance} km</div>
+                                            <div className="font-bold text-amber-500">€{contract.reward.toLocaleString(undefined, { maximumFractionDigits: 0 })}</div>
+                                            <div className="text-[10px] text-slate-600 uppercase font-bold">{Math.round(contract.distance)} km</div>
                                         </div>
                                     </div>
                                 );
@@ -122,7 +122,33 @@ export const Dashboard: React.FC<{ className?: string }> = ({ className }) => {
                 </div>
 
                 {/* Company Status */}
-                <div className="glass-panel p-6 flex flex-col justify-between">
+                <div className="glass-panel p-6 flex flex-col justify-between relative overflow-hidden">
+                    {/* HQ Selection Overlay */}
+                    {game.hqLocation === "" && (
+                        <div className="absolute inset-0 bg-slate-900/95 z-50 flex flex-col p-6 animate-slide-in">
+                            <div className="mb-4">
+                                <h4 className="text-lg font-bold text-white uppercase tracking-tight">Establish Headquarters</h4>
+                                <p className="text-xs text-slate-400 mt-1">Select your first base of operations. The first choice is free.</p>
+                            </div>
+                            <div className="flex-1 overflow-y-auto custom-scrollbar space-y-2">
+                                {CITIES.map(city => {
+                                    const cityLabel = `${city.name}, ${city.id.split('-')[0].toUpperCase()}`;
+                                    return (
+                                        <button
+                                            key={city.id}
+                                            onClick={() => dispatch({ type: 'SET_HQ', payload: cityLabel })}
+                                            className="w-full text-left p-3 rounded-xl bg-slate-800/50 border border-slate-700 hover:border-blue-500 hover:bg-slate-800 transition-all group"
+                                        >
+                                            <div className="flex justify-between items-center">
+                                                <span className="font-bold text-slate-200">{city.name}</span>
+                                                <MapPin size={16} className="text-slate-600 group-hover:text-blue-400" />
+                                            </div>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )}
                     <h3 className="text-xl font-bold mb-6">Company Status</h3>
 
                     <div className="space-y-6">

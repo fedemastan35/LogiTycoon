@@ -3,6 +3,7 @@ import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet'
 import L from 'leaflet';
 import { useGame } from '../../context/GameContext';
 import { CITIES } from '../../data/cities';
+import { CONNECTIONS } from '../../data/connections';
 import 'leaflet/dist/leaflet.css';
 
 // Fix Leaflet generic marker icon
@@ -95,6 +96,28 @@ export const MapView: React.FC = () => {
                     url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
                 />
+
+                {/* Background Road Network */}
+                {CONNECTIONS.map((conn, idx) => {
+                    const fromCity = CITIES.find(c => c.id === conn.from);
+                    const toCity = CITIES.find(c => c.id === conn.to);
+                    if (!fromCity || !toCity) return null;
+                    return (
+                        <Polyline
+                            key={`road-${idx}`}
+                            positions={[
+                                [fromCity.coordinates.lat, fromCity.coordinates.lng],
+                                [toCity.coordinates.lat, toCity.coordinates.lng]
+                            ]}
+                            pathOptions={{
+                                color: '#475569', // Slate 600
+                                weight: 1.5,
+                                opacity: 0.4,
+                                dashArray: '1, 3' // Subtle dotted/dashed look for background
+                            }}
+                        />
+                    );
+                })}
 
                 {/* Cities */}
                 {CITIES.map(city => (

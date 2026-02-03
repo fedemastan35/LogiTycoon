@@ -1,0 +1,43 @@
+export interface Connection {
+    from: string;
+    to: string;
+}
+
+export const CONNECTIONS: Connection[] = [
+    { from: 'london', to: 'paris' },
+    { from: 'london', to: 'brussels' },
+    { from: 'paris', to: 'brussels' },
+    { from: 'paris', to: 'lyon' },
+    { from: 'paris', to: 'amsterdam' },
+    { from: 'paris', to: 'madrid' },
+    { from: 'amsterdam', to: 'brussels' },
+    { from: 'amsterdam', to: 'berlin' },
+    { from: 'amsterdam', to: 'hamburg' },
+    { from: 'berlin', to: 'prague' },
+    { from: 'berlin', to: 'warsaw' },
+    { from: 'berlin', to: 'hamburg' },
+    { from: 'hamburg', to: 'amsterdam' },
+    { from: 'prague', to: 'warsaw' },
+    { from: 'prague', to: 'vienna' },
+    { from: 'prague', to: 'munich' },
+    { from: 'vienna', to: 'munich' },
+    { from: 'vienna', to: 'budapest' },
+    { from: 'munich', to: 'milan' },
+    { from: 'munich', to: 'zurich' },
+    { from: 'milan', to: 'lyon' },
+    { from: 'milan', to: 'rome' },
+    { from: 'milan', to: 'zurich' },
+    { from: 'rome', to: 'naples' },
+    { from: 'naples', to: 'bari' },
+    { from: 'lyon', to: 'marseille' },
+    { from: 'lyon', to: 'barcelona' },
+    { from: 'marseille', to: 'nice' },
+    { from: 'nice', to: 'milan' },
+    { from: 'barcelona', to: 'madrid' },
+    { from: 'madrid', to: 'lisbon' },
+    { from: 'lisbon', to: 'porto' },
+    { from: 'porto', to: 'madrid' },
+    { from: 'warsaw', to: 'krakow' },
+    { from: 'krakow', to: 'vienna' },
+    { from: 'budapest', to: 'bucharest' },
+];

@@ -7,6 +7,11 @@ export const INITIAL_GAME_STATE: GameState = {
     paused: true,
     gameSpeed: 1,
     loans: [],
+    // Company Details
+    companyName: 'LogiCorp',
+    hqLocation: 'Berlin, DE',
+    foundedDate: '2/2/2026',
+    reputation: 'Excellent',
 };
 
 export const INITIAL_TRUCKS: Truck[] = [

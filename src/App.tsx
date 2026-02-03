@@ -4,6 +4,7 @@ import { MapView } from './features/map/MapView';
 import { FleetList } from './features/fleet/FleetList';
 import { ContractBoard } from './features/contracts/ContractBoard';
 import { BankPanel } from './features/bank/BankPanel';
+import { Dashboard } from './features/dashboard/Dashboard';
 import { DriverMarket } from './features/drivers/DriverMarket';
 import { Truck, Package, LayoutDashboard, Pause, Play, Landmark, Eye, EyeOff, Users } from 'lucide-react';
 import './styles/global.css';
@@ -77,7 +78,6 @@ const GameControls = ({ showUI, setShowUI }: { showUI: boolean, setShowUI: (v: b
 const UIOverlay = () => {
   const [view, setView] = useState<'DASHBOARD' | 'FLEET' | 'CONTRACTS' | 'BANK' | 'DRIVERS'>('DASHBOARD');
   const [showUI, setShowUI] = useState(true);
-  const { state: { trucks } } = useGame();
 
   const navItems = [
     { id: 'DASHBOARD', icon: LayoutDashboard, label: 'Home' },
@@ -87,7 +87,11 @@ const UIOverlay = () => {
     { id: 'BANK', icon: Landmark, label: 'Bank' },
   ];
 
-  const commonPanelClass = "glass-panel w-full lg:w-96 h-[50vh] lg:h-full p-4 pointer-events-auto animate-slide-in flex flex-col absolute bottom-0 lg:static z-20";
+  // Wide class for dashboard, normal for side panels
+  const isDashboard = view === 'DASHBOARD';
+  const commonPanelClass = isDashboard
+    ? "w-full max-w-6xl mx-auto h-[70vh] lg:h-[80vh] p-4 pointer-events-auto flex flex-col absolute bottom-0 lg:relative lg:bottom-auto z-20"
+    : "glass-panel w-full lg:w-96 h-[50vh] lg:h-full p-4 pointer-events-auto animate-slide-in flex flex-col absolute bottom-0 lg:static z-20";
 
   return (
     <div className="absolute inset-0 pointer-events-none flex flex-col">
@@ -120,22 +124,12 @@ const UIOverlay = () => {
         </div>
 
         {/* Content Container */}
-        <div className="flex-1 p-2 lg:p-4 mt-0 h-full relative pointer-events-none flex flex-col-reverse lg:block">
+        <div className={`flex-1 p-2 lg:p-4 mt-0 h-full relative pointer-events-none flex flex-col-reverse lg:block ${isDashboard ? 'flex items-center justify-center' : ''}`}>
           {view === 'FLEET' && <FleetList className={commonPanelClass} />}
           {view === 'CONTRACTS' && <ContractBoard className={commonPanelClass} />}
           {view === 'BANK' && <BankPanel className={commonPanelClass} />}
           {view === 'DRIVERS' && <DriverMarket className={commonPanelClass} />}
-          {view === 'DASHBOARD' && (
-            <div className={commonPanelClass}>
-              <h2 className="text-2xl font-bold mb-2">Welcome Manager</h2>
-              <p className="text-slate-400 mb-4">You have {trucks.length} truck{trucks.length !== 1 ? 's' : ''}.</p>
-
-              <div className="grid grid-cols-2 gap-4">
-                <button onClick={() => setView('CONTRACTS')} className="btn btn-primary justify-center text-sm">Find Jobs</button>
-                <button onClick={() => setView('FLEET')} className="btn justify-center text-sm">Manage</button>
-              </div>
-            </div>
-          )}
+          {view === 'DASHBOARD' && <Dashboard className={commonPanelClass} />}
         </div>
       </div>
 

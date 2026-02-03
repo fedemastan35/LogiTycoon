@@ -61,4 +61,9 @@ export interface GameState {
     gameSpeed: number; // 1x, 10x, etc.
     loans: Loan[];
     lastInfluenceTime?: number; // Track daily updates
+    // Company Details
+    companyName: string;
+    hqLocation: string;
+    foundedDate: string;
+    reputation: 'Small' | 'Good' | 'Excellent' | 'Elite';
 }
